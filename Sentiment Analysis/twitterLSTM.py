@@ -27,8 +27,8 @@ with open('data/twitter/train_set.csv', 'r', encoding='utf8') as trainfile:
         # Append tweet to corpus list
         corpus.append(row[-1])
         # Append sentiment to sentiments list
-        # 0 is negative, 2 is neutral and 4 is positive => mapped to 0, 1 and 2
-        # This is a multiclass problem.
+        # 0 is negative and 4 is positive => mapped to 0 and 1
+        # This is a binary problem.
         if row[0] == '0':
             sentiments.append(0)
         elif row[0] == '4':
