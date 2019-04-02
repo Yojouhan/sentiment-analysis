@@ -12,13 +12,13 @@ maxlen = 200
 embedding_size = 64
 batch_size = 32
 epochs = 20
-counter = 0
 # A dictionary that holds all review data, and a counter for each key. Also create a list that holds review text and
 # a list that contains the sentiments. They'll then be processed in parallel.
 train_dict = {}
 reviews = []
 sentiments = []
 document = 1
+counter = 0
 # Parse json file into a dictionary, line by line.
 print('Loading data...')
 with open('data/movies/amazonMovies.json', 'r') as f:
