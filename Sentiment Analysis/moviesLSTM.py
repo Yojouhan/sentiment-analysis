@@ -131,10 +131,9 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-'''
+
 # Save some statistics to a csv
 with open('statistics/movies/moviesLSTM.csv', 'a', encoding='utf8', newline='') as outfile:
     writer = csv.writer(outfile, delimiter=',')
     # Record: Vocabulary size, review length, embedding size, batch_size, epochs, val_acc
     writer.writerow([top_words, maxlen, embedding_size, batch_size, epochs, results[1]])
-'''
