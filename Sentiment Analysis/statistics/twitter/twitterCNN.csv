@@ -1,0 +1,5 @@
+Vocabulary size, review length, embedding size, batch_size, filters, kernel_size, stride, epochs, dropout_perc, test_acc
+4000,400,50,32,250,3,1,5,0.5,0.80315
+4000,400,50,32,250,3,1,10,0.3,0.810525
+4000,400,50,64,250,3,1,10,0.3,0.812125
+5000,400,40,64,250,3,1,15,0.3,0.812175
