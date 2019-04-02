@@ -129,10 +129,9 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-'''
+
 # Save some statistics to a csv
 with open('statistics/movies/moviesMLP.csv', 'a', encoding='utf8', newline='') as outfile:
     writer = csv.writer(outfile, delimiter=',')
     # Record: Vocabulary size, svd components, hidden layer size, batch_size, epochs, dropout_perc, test_acc
     writer.writerow([max_words, n_components, hidden_layer_size, batch_size, epochs, dropout_perc, results[1]])
-'''
