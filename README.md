@@ -3,5 +3,4 @@ Sentiment analysis-classification project for the Big Data course I'm taking in 
 
 The following publicly available datasets are used: Sentiment 140: http://help.sentiment140.com/for-students
 
-Amazon review data (Cell Phones and accessories category): http://jmcauley.ucsd.edu/data/amazon/
-
+Amazon review data (Cell Phones and accessories category): http://jmcauley.ucsd.edu/data/amazon/ plus the Movies & TV data from the link.
