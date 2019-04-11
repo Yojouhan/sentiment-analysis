@@ -7,15 +7,28 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import matplotlib.pyplot as plt
+from random import shuffle
+from nltk.stem import WordNetLemmatizer
+from nltk import word_tokenize
+
+
+# Lemmatization class
+class Lemmatizer():
+    def __init__(self):
+        self.lem = WordNetLemmatizer()
+
+    def __call__(self, document):
+        return [self.lem.lemmatize(text) for text in word_tokenize(document)]
+
 
 # Parameters for keras
 # Max words is how many top words to consider (term frequency is used)
 epochs = 10
 batch_size = 32
-hidden_layer_size = 100
+hidden_layer_size = 150
 dropout_perc = 0.5
-max_words = 1000
-n_components = 150
+max_words = 5000
+n_components = 200
 # A dictionary that holds all review data, and a counter for each key. Also create a list that holds review text and
 # a list that contains the sentiments. They'll then be processed in parallel.
 train_dict = {}
@@ -42,26 +55,33 @@ for docID in train_dict:
     reviews.append(train_dict[docID]['reviewText'])
     sentiments.append(train_dict[docID]['overall'])
 
+# First, we need to shuffle the lists in the same order, because in the original data they are not shuffled.
+zippedList = list(zip(reviews, sentiments))
+shuffle(zippedList)
+reviews, sentiments = zip(*zippedList)
 # Release some memory as the dict is no longer needed
-del train_dict
+del train_dict, zippedList
 # Count class occurence
 print(Counter(sentiments))
 # Split into train and test data. We use a 80-20 split here.
 # Also convert the sentiments list to a list of ints, to save memory
 sentiments = np.array([int(i - 1) for i in sentiments])
-print(len(reviews),len(sentiments))
+# Number of classes (5)
+
 
 # Split into train and test set
 x_train = reviews[0:int(0.8 * len(reviews))]
 y_train = sentiments[0:int(0.8 * len(sentiments))]
 x_test = reviews[int(0.8 * len(reviews)):]
 y_test = sentiments[int(0.8 * len(sentiments)):]
-del reviews,sentiments
+num_classes = np.max(sentiments) + 1
+print('Number of classes:', num_classes)
+del reviews, sentiments
 print('Train test size is', len(x_train), 'Test set size is ', len(x_test))
 # Perform dimensionality reduction with help from sklearn and keep the most relevant 200 features
 # TruncatedSVD is used
 print('Vectorizing text with tf-idf...')
-vectorizer = TfidfVectorizer(max_features=max_words,stop_words='english')
+vectorizer = TfidfVectorizer(tokenizer=Lemmatizer(), min_df=5)
 x_train = vectorizer.fit_transform(x_train)
 print('Data shape is ', x_train.shape)
 print('Performing SVD...')
@@ -70,10 +90,7 @@ x_train = svd.fit_transform(x_train)
 # Also transform the test set
 x_test = vectorizer.transform(x_test)
 x_test = svd.transform(x_test)
-# Number of classes (5)
-num_classes = np.max(sentiments) + 1
-print('Number of classes:', num_classes)
-print(len(y_train))
+
 # Convert to one hot encoding
 y_train = np.eye(num_classes)[y_train]
 y_test = np.eye(num_classes)[y_test]
@@ -128,7 +145,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
-
 
 # Save some statistics to a csv
 with open('statistics/movies/moviesMLP.csv', 'a', encoding='utf8', newline='') as outfile:
