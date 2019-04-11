@@ -1,3 +1,5 @@
 Vocabulary size, n_components, hidden_layer_size, batch_size, epochs, dropout_perc, test_acc
 5000,200,100,32,10,0.5,0.58331877
 10000,200,100,32,10,0.5,0.58373123
+-,200,100,32,10,0.5,0.63062 (Wordnet lemmatizer, 5000000 reviews)
+-,200,150,32,10,0.5,0.63181 (Wordnet lemmatizer, min_df = 5)
