@@ -13,12 +13,12 @@ from nltk import word_tokenize
 
 
 # Lemmatization class
-class Lemmatizer():
+class Lemmatizer:
     def __init__(self):
         self.lem = WordNetLemmatizer()
 
-    def __call__(self, document):
-        return [self.lem.lemmatize(text) for text in word_tokenize(document)]
+    def __call__(self, raw_document):
+        return [self.lem.lemmatize(text) for text in word_tokenize(raw_document)]
 
 
 # Parameters for keras

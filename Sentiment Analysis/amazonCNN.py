@@ -5,7 +5,9 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import os
 
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 # Network and preprocessing parameters: Number of most common words to keep, max review size, embedding vector size...
 top_words = 5000
 maxlen = 400
@@ -99,7 +101,8 @@ model.add(keras.layers.Dense(maxlen, activation='relu'))
 model.add(keras.layers.Dropout(0.5))
 model.add(keras.layers.Dense(num_classes))
 model.add(keras.layers.Activation('softmax'))
-
+# Save model architecture to file
+keras.utils.plot_model(model, to_file='modelCNN.png', show_shapes=True, show_layer_names=True)
 # Multiclass problem-> should use categorical crossentropy, and adam or rmsprop preferably.
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',

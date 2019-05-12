@@ -8,13 +8,13 @@ import csv
 
 # Network and preprocessing parameters: Number of most common words to keep, max review size, embedding vector size...
 top_words = 5000
-maxlen = 300
+maxlen = 20
 embedding_size = 50
 batch_size = 32
 filters = 250
 kernel_size = 3
 stride = 1
-epochs = 20
+epochs = 5
 counter = 0
 
 # A dictionary that holds all review data, and a counter for each key. Also create a list that holds review text and
@@ -30,8 +30,7 @@ with open('data/movies/amazonMovies.json', 'r') as f:
         train_dict[document] = json.loads(line)
         document += 1
         counter += 1
-        # Parse 500000 reviews
-
+        # Parse 800000 reviews
         if counter == 500000:
             break
 
@@ -42,6 +41,7 @@ for docID in train_dict:
     reviews.append(train_dict[docID]['reviewText'])
     sentiments.append(train_dict[docID]['overall'])
 
+print(reviews[0], sentiments[0])
 # Release some memory as the dict is no longer needed. Can be helpful in machines with low RAM.
 del train_dict
 # Count class occurrence
@@ -67,9 +67,10 @@ tokenizer.fit_on_texts(x_train)
 # word's frequency in the entire corpus.
 print('Transforming texts to vectors...')
 x_train = tokenizer.texts_to_sequences(x_train)
+print(x_train[0])
 x_test = tokenizer.texts_to_sequences(x_test)
 print('Sample vectorized text', x_train[0])
-vocabulary_size = max(np.amax(x_train))+1
+vocabulary_size = max(np.amax(x_train)) + 1
 print('Vocabulary size: ', vocabulary_size)
 
 # Convert to one hot encoding for use with categorical crossentropy.
@@ -101,7 +102,7 @@ model.add(keras.layers.Dropout(0.5))
 model.add(keras.layers.Conv1D(filters, kernel_size, padding='valid', activation='relu', strides=stride))
 model.add(keras.layers.GlobalMaxPooling1D())
 # Add a hidden layer
-model.add(keras.layers.Dense(maxlen, activation='relu'))
+model.add(keras.layers.Dense(filters, activation='relu'))
 model.add(keras.layers.Dropout(0.5))
 model.add(keras.layers.Dense(num_classes))
 model.add(keras.layers.Activation('softmax'))
@@ -138,7 +139,6 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
-
 
 # Save some statistics to a csv
 with open('statistics/movies/moviesCNN.csv', 'a', encoding='utf8', newline='') as outfile:

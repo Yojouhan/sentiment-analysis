@@ -1,6 +1,7 @@
 import csv
 from collections import Counter
 import re
+from sklearn.model_selection import train_test_split
 from random import shuffle
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -19,64 +20,57 @@ n_components = 200
 # One list for the tweet corpus, one list for each corresponding sentiment
 corpus = []
 sentiments = []
-
-# Read train set file and skip first row
-print('Loading data...')
+counter = 0
+print('Loading twitter data...')
 with open('data/twitter/train_set.csv', 'r', encoding='utf8') as trainfile:
     reader = csv.reader(trainfile, delimiter=',')
-    headers = next(reader)
+    next(reader)
     for row in reader:
         # Append tweet to corpus list
         corpus.append(row[-1])
         # Append sentiment to sentiments list
-        # 0 is negative,  4 is positive => mapped to 0 and 1
+        # 0 is negative and 4 is positive => mapped to 0 and 1
         # This is a binary problem.
         if row[0] == '0':
             sentiments.append(0)
         elif row[0] == '4':
             sentiments.append(1)
+        counter += 1
+        # Check if we loaded the negative tweets, so as to skip 400000 rows to subsample original dataset
+        if counter == 400000:
+            for skip in range(400000):
+                next(reader)
 
-# First, we need to shuffle the lists in the same order, because in the original data they are not shuffled.
-zippedList = list(zip(corpus, sentiments))
-shuffle(zippedList)
-corpus, sentiments = zip(*zippedList)
-# For memory and speed reasons, we will use 50% of the available corpus. 80% will be training data, 10% validation and
-# 10% test.
-cutoffIndex = int(len(corpus) / 2)
-corpus = corpus[:cutoffIndex]
-sentiments = sentiments[:cutoffIndex]
+        # Stop when 800000 tweets are loaded
+        if len(corpus) > 800000:
+            break
+
 # Check class balance
 print(Counter(sentiments))
 
 
 # Function to clean the corpus. Twitter data is very "dirty", and contains a lot of irrelevant info which can affect
-# accuracy signifcantly. Will keep modifying as further tests are performed.
+# accuracy signifcantly
 def preprocess(texts):
     # Remove http links
-    cleanCorpus = []
+    clean_corpus = []
     for tweet in texts:
         result = re.sub(r"http\S+", "", tweet)
-        cleanCorpus.append(result)
-    return cleanCorpus
+        clean_corpus.append(result)
+    return clean_corpus
 
 
 corpus = preprocess(corpus)
-# print(corpus)
-# Since we have 800.000 patterns, split is 640.000/72.000/72.000. Class distribution is balanced and data was randomly
-# shuffled, so we can safely sample the data in sequence.
-x_train = corpus[:640000]
-y_train = sentiments[:640000]
-x_val = corpus[640000:720000]
-y_val = sentiments[640000:720000]
-x_test = corpus[720000:]
-y_test = sentiments[720000:]
+# Since we have 800.000 patterns, split is 640.000/160.000.
+x_train, x_test, y_train, y_test = train_test_split(corpus, sentiments,
+                                                    stratify=sentiments,
+                                                    test_size=0.2)
 # Release some memory
 del corpus, sentiments
 print('Vectorizing data...')
 vectorizer = TfidfVectorizer(strip_accents='unicode', max_features=2500)
 x_train = vectorizer.fit_transform(x_train)
 print(vectorizer.vocabulary_)
-x_val = vectorizer.transform(x_val)
 x_test = vectorizer.transform(x_test)
 print('Training corpus shape after tf idf is: ', x_train.shape)
 # Perform dimensionality reduction with help from sklearn and keep the most relevant 200 features
@@ -84,7 +78,6 @@ print('Training corpus shape after tf idf is: ', x_train.shape)
 print('Performing SVD...')
 svd = TruncatedSVD(n_components=n_components)
 x_train = svd.fit_transform(x_train)
-x_val = svd.transform(x_val)
 x_test = svd.transform(x_test)
 print('Data shape after SVD is ', x_train.shape)
 # Built Tensorflow-Keras MLP model
@@ -115,7 +108,7 @@ history = model.fit(x_train,
                     epochs=epochs,
                     batch_size=batch_size,
                     # callbacks=callbacks,
-                    validation_data=(x_val, y_val),
+                    validation_split=0.1,
                     verbose=1
                     )
 results = model.evaluate(x_test, y_test, verbose=1)

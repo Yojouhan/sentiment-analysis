@@ -5,7 +5,9 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import os
 
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 # Network and preprocessing parameters: Number of most common words to keep, max review size, embedding vector size...
 top_words = 5000
 maxlen = 200
@@ -68,7 +70,7 @@ y_train = np.eye(num_classes)[y_train]
 y_test = np.eye(num_classes)[y_test]
 
 # Pad each sequence to a fixed size
-print('Padding sequences to a fixed size of 100...')
+print('Padding sequences to a fixed size of', maxlen)
 x_train = keras.preprocessing.sequence.pad_sequences(x_train, maxlen=maxlen)
 x_test = keras.preprocessing.sequence.pad_sequences(x_test, maxlen=maxlen)
 
@@ -94,7 +96,8 @@ model.add(
                       recurrent_activation='sigmoid'))
 model.add(keras.layers.Dense(num_classes))
 model.add(keras.layers.Activation('softmax'))
-
+# Save model architecture to file
+keras.utils.plot_model(model, to_file='modelLSTM.png', show_shapes=True, show_layer_names=True)
 # Multiclass problem-> should use categorical crossentropy, and adam or rmsprop preferably.
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',

@@ -1,5 +1,6 @@
 import json
 import csv
+import os
 import tensorflow as tf
 from tensorflow import keras
 from collections import Counter
@@ -8,6 +9,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import matplotlib.pyplot as plt
 
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
 # Parameters for keras
 # Max words is how many top words to consider (term frequency is used)
 epochs = 50
@@ -22,6 +24,7 @@ train_dict = {}
 reviews = []
 sentiments = []
 document = 1
+
 # Parse json file into a dictionary, line by line.
 print('Loading data...')
 with open('data/amazon/data.json', 'r') as f:
@@ -54,7 +57,7 @@ print('Train test size is', len(x_train), 'Test set size is ', len(x_test))
 print('Performing SVD...')
 vectorizer = TfidfVectorizer(max_features=max_words)
 x_train = vectorizer.fit_transform(x_train)
-print('Data shape is ', x_train.shape)
+print('Data shape before SVD is ', x_train.shape)
 svd = TruncatedSVD(n_components=n_components)
 x_train = svd.fit_transform(x_train)
 # Also transform the test set
@@ -85,6 +88,8 @@ model.add(keras.layers.Dense(hidden_layer_size, input_shape=(n_components,), act
 model.add(keras.layers.Dropout(dropout_perc))
 model.add(keras.layers.Dense(num_classes))
 model.add(keras.layers.Activation('softmax'))
+# Save model architecture to file
+keras.utils.plot_model(model, to_file='modelMLP.png', show_shapes=True, show_layer_names=True)
 # Multiclass problem-> should use categorical crossentropy, and adam or rmsprop preferably.
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',

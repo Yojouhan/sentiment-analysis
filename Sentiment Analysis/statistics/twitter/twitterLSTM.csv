@@ -2,3 +2,5 @@ Vocabulary size, review length, embedding size, batch_size, epochs, test_acc
 5000,200,64,32,5,0.81575
 5000,200,128,32,5,0.808675
 5000,300,64,32,10,0.801775
+
+
